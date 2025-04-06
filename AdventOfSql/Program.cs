@@ -1,5 +1,5 @@
 ﻿using AdventOfSql.Infrastructure;
 using Garyon.Objects;
 
-var identifier = new ChallengeIdentifier(2024, 03, TestCaseIdentifier.RealInput);
+var identifier = new ChallengeIdentifier(2024, 05, TestCaseIdentifier.RealInput);
 await Singleton<ConsoleChallengeRunner>.Instance.Run(identifier);
