@@ -31,7 +31,7 @@ public sealed class ChallengeRunner
         var inputFile = FileForChallenge(SqlKinds.Inputs, identifier);
 
         var inputStart = Stopwatch.GetTimestamp();
-        await ExecuteSql(connection, inputFile);
+        await ExecuteInput(connection, inputFile);
         var inputTime = Stopwatch.GetElapsedTime(inputStart);
 
         // Solution
@@ -42,6 +42,17 @@ public sealed class ChallengeRunner
         var solveTime = Stopwatch.GetElapsedTime(solveStart);
 
         return new(identifier, solutionResult, schemaTime, inputTime, solveTime);
+    }
+
+    private static async Task ExecuteInput(
+        SqlConnection connection,
+        FileInfo sqlFile)
+    {
+        var sql = await sqlFile.ReadAllTextAsync();
+        // Pre-process the input to allow more than 1k inserts per command
+        // We want this to throw if it fails
+        sql = SqlCommandExtensions.BreakDownInsertStatements(sql);
+        await connection.ExecuteAsync(sql);
     }
 
     private static async Task ExecuteSql(

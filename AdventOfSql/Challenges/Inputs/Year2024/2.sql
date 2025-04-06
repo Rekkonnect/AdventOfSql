@@ -998,10 +998,7 @@ INSERT INTO letters_a (id, value) VALUES
 (997, 43),
 (998, 125),
 (999, 124),
-(1000, 124);
-
--- Broken down due to SQL Server's limit of 1000 rows
-INSERT INTO letters_a (id, value) VALUES
+(1000, 124),
 (1001, 91),
 (1002, 47),
 (1003, 125),
@@ -2001,10 +1998,7 @@ INSERT INTO letters_a (id, value) VALUES
 (1997, 91),
 (1998, 124),
 (1999, 125),
-(2000, 43);
-
--- Broken down due to SQL Server's limit of 1000 rows
-INSERT INTO letters_a (id, value) VALUES
+(2000, 43),
 (2001, 123),
 (2002, 36),
 (2003, 37),
@@ -3556,10 +3550,7 @@ INSERT INTO letters_b (id, value) VALUES
 (997, 96),
 (998, 60),
 (999, 123),
-(1000, 60);
-
--- Broken down due to SQL Server's limit of 1000 rows
-INSERT INTO letters_b (id, value) VALUES
+(1000, 60),
 (1001, 62),
 (1002, 60),
 (1003, 61),
@@ -4559,10 +4550,7 @@ INSERT INTO letters_b (id, value) VALUES
 (1997, 62),
 (1998, 38),
 (1999, 123),
-(2000, 36);
-
--- Broken down due to SQL Server's limit of 1000 rows
-INSERT INTO letters_b (id, value) VALUES
+(2000, 36),
 (2001, 61),
 (2002, 37),
 (2003, 94),

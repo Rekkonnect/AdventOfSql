@@ -7,6 +7,14 @@ public sealed class ConsoleChallengeRunner
 {
     private readonly ChallengeRunner _challengeRunner = Singleton<ChallengeRunner>.Instance;
 
+    public async Task RunMany(IReadOnlyList<ChallengeIdentifier> identifiers)
+    {
+        foreach (var identifier in identifiers)
+        {
+            await Run(identifier);
+        }
+    }
+
     public async Task Run(ChallengeIdentifier identifier)
     {
         var challengeIdentifierDisplay = FormatChallengeIdentifier(identifier);
@@ -30,6 +38,7 @@ public sealed class ConsoleChallengeRunner
 
         var table = result.Result.ConstructSpectreTable();
         AnsiConsole.Write(table);
+        AnsiConsole.WriteLine();
     }
 
     private static string PrintExecutionTime(TimeSpan time)

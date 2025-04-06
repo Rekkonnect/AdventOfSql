@@ -997,9 +997,7 @@ INSERT INTO children (child_id, name, age, city) VALUES
 (996, 'Marisa', 6, 'Cormier'),
 (997, 'Winnifred', 14, 'Zemlak'),
 (998, 'Rahsaan', 6, 'Mueller'),
-(999, 'Shania', 3, 'South Keely');
-
-INSERT INTO children (child_id, name, age, city) VALUES
+(999, 'Shania', 3, 'South Keely'),
 (1000, 'Lura', 10, 'Deon'),
 (1001, 'Buford', 6, 'Grayce'),
 (1002, 'Bobbie', 4, 'Arno'),
@@ -1999,9 +1997,7 @@ INSERT INTO children (child_id, name, age, city) VALUES
 (1996, 'Emile', 13, 'East Dock'),
 (1997, 'Alejandra', 2, 'North Hadley'),
 (1998, 'Kaley', 7, 'Weber'),
-(1999, 'Dalton', 3, 'North Amiya');
-
-INSERT INTO children (child_id, name, age, city) VALUES
+(1999, 'Dalton', 3, 'North Amiya'),
 (2000, 'Otto', 15, 'Maggio'),
 (2001, 'Enoch', 10, 'Krystel'),
 (2002, 'Moses', 9, 'North Domingo'),
@@ -3001,9 +2997,7 @@ INSERT INTO children (child_id, name, age, city) VALUES
 (2996, 'Lavern', 4, 'North Idell'),
 (2997, 'Jairo', 3, 'Strosin'),
 (2998, 'Teresa', 16, 'North Roslyn'),
-(2999, 'Sandy', 7, 'Nienow');
-
-INSERT INTO children (child_id, name, age, city) VALUES
+(2999, 'Sandy', 7, 'Nienow'),
 (3000, 'Marina', 3, 'Hailie'),
 (3001, 'Kelvin', 9, 'East Travon'),
 (3002, 'Pascale', 14, 'Althea'),
@@ -4003,9 +3997,7 @@ INSERT INTO children (child_id, name, age, city) VALUES
 (3996, 'Ethyl', 12, 'Stiedemann'),
 (3997, 'Fritz', 14, 'Bogisich'),
 (3998, 'Rosetta', 4, 'Flavio'),
-(3999, 'Allan', 2, 'Oda');
-
-INSERT INTO children (child_id, name, age, city) VALUES
+(3999, 'Allan', 2, 'Oda'),
 (4000, 'Payton', 14, 'Lake Ericka'),
 (4001, 'Braulio', 15, 'Hudson'),
 (4002, 'Laurine', 8, 'Armstrong'),
@@ -5005,9 +4997,7 @@ INSERT INTO children (child_id, name, age, city) VALUES
 (4996, 'Schuyler', 3, 'Gerhold'),
 (4997, 'Fabian', 8, 'Port Estrella'),
 (4998, 'Ron', 2, 'North Erica'),
-(4999, 'Yvette', 12, 'Lehner');
-
-INSERT INTO children (child_id, name, age, city) VALUES
+(4999, 'Yvette', 12, 'Lehner'),
 (5000, 'Immanuel', 4, 'Cloyd');
 
 INSERT INTO gifts (gift_id, name, price, child_id) VALUES
@@ -6009,9 +5999,7 @@ INSERT INTO gifts (gift_id, name, price, child_id) VALUES
 (996, 'toy rocket', 613.05, 2914),
 (997, 'toy camera', 821.34, 3287),
 (998, 'bubble machine', 795.76, 1630),
-(999, 'magnetic tiles', 69.13, 1569);
-
-INSERT INTO gifts (gift_id, name, price, child_id) VALUES
+(999, 'magnetic tiles', 69.13, 1569),
 (1000, 'crystal growing kit', 547.54, 1264),
 (1001, 'toy camera', 377.36, 3748),
 (1002, 'toy computer', 413.13, 915),
@@ -7011,9 +6999,7 @@ INSERT INTO gifts (gift_id, name, price, child_id) VALUES
 (1996, 'domino set', 83.16, 3759),
 (1997, 'magic carpet', 436.35, 895),
 (1998, 'trading cards', 492.89, 1655),
-(1999, 'toy binoculars', 942.9, 965);
-
-INSERT INTO gifts (gift_id, name, price, child_id) VALUES
+(1999, 'toy binoculars', 942.9, 965),
 (2000, 'toy computer', 319.33, 226),
 (2001, 'unicorn plush', 710.92, 3648),
 (2002, 'toy boat', 940.07, 1473),
@@ -8013,9 +7999,7 @@ INSERT INTO gifts (gift_id, name, price, child_id) VALUES
 (2996, 'magic treehouse', 422.22, 1627),
 (2997, 'fairy wings', 812.15, 3386),
 (2998, 'remote control helicopter', 604.76, 882),
-(2999, 'toy airplane', 637.74, 4174);
-
-INSERT INTO gifts (gift_id, name, price, child_id) VALUES
+(2999, 'toy airplane', 637.74, 4174),
 (3000, 'friendship bracelet maker', 837.84, 3130),
 (3001, 'puzzle box', 831.26, 4788),
 (3002, 'baseball set', 60.49, 4039),
@@ -9015,9 +8999,7 @@ INSERT INTO gifts (gift_id, name, price, child_id) VALUES
 (3996, 'rocking horse', 931.81, 2761),
 (3997, 'toy phone', 840.81, 4315),
 (3998, 'jump rope', 659.48, 2392),
-(3999, 'crystal growing kit', 326.43, 3153);
-
-INSERT INTO gifts (gift_id, name, price, child_id) VALUES
+(3999, 'crystal growing kit', 326.43, 3153),
 (4000, 'telescope', 284.79, 1680),
 (4001, 'xylophone', 186.21, 1249),
 (4002, 'jump rope', 644.8, 2617),
@@ -10017,7 +9999,5 @@ INSERT INTO gifts (gift_id, name, price, child_id) VALUES
 (4996, 'rock tumbler', 301.34, 808),
 (4997, 'toy guitar', 993.63, 3110),
 (4998, 'bubble machine', 406.63, 348),
-(4999, 'learning tablet', 57.83, 173);
-
-INSERT INTO gifts (gift_id, name, price, child_id) VALUES
+(4999, 'learning tablet', 57.83, 173),
 (5000, 'scooter', 104.3, 2890);

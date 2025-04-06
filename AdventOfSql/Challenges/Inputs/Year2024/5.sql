@@ -997,10 +997,7 @@ INSERT INTO toy_production (production_date, toys_produced) VALUES
 ('2022-03-11', 5152),
 ('2022-03-10', 748),
 ('2022-03-09', 2596),
-('2022-03-08', 8955);
-
--- Broken down due to SQL Server's limit of 1000 rows
-INSERT INTO toy_production (production_date, toys_produced) VALUES
+('2022-03-08', 8955),
 ('2022-03-07', 929),
 ('2022-03-06', 6465),
 ('2022-03-05', 9218),
@@ -1997,10 +1994,7 @@ INSERT INTO toy_production (production_date, toys_produced) VALUES
 ('2019-06-18', 1972),
 ('2019-06-17', 7502),
 ('2019-06-16', 5451),
-('2019-06-15', 8514);
-
--- Broken down due to SQL Server's limit of 1000 rows
-INSERT INTO toy_production (production_date, toys_produced) VALUES
+('2019-06-15', 8514),
 ('2019-06-14', 7445),
 ('2019-06-13', 5590),
 ('2019-06-12', 5720),
@@ -2997,10 +2991,7 @@ INSERT INTO toy_production (production_date, toys_produced) VALUES
 ('2016-09-24', 8888),
 ('2016-09-23', 4594),
 ('2016-09-22', 5504),
-('2016-09-21', 4893);
-
--- Broken down due to SQL Server's limit of 1000 rows
-INSERT INTO toy_production (production_date, toys_produced) VALUES
+('2016-09-21', 4893),
 ('2016-09-20', 5733),
 ('2016-09-19', 4367),
 ('2016-09-18', 7700),
@@ -3996,10 +3987,7 @@ INSERT INTO toy_production (production_date, toys_produced) VALUES
 ('2014-01-02', 4995),
 ('2014-01-01', 9287),
 ('2013-12-31', 113),
-('2013-12-30', 8518);
-
--- Broken down due to SQL Server's limit of 1000 rows
-INSERT INTO toy_production (production_date, toys_produced) VALUES
+('2013-12-30', 8518),
 ('2013-12-29', 5126),
 ('2013-12-28', 9705),
 ('2013-12-27', 5291),
@@ -4997,10 +4985,7 @@ INSERT INTO toy_production (production_date, toys_produced) VALUES
 ('2011-04-10', 4615),
 ('2011-04-09', 8657),
 ('2011-04-08', 9575),
-('2011-04-07', 1557);
-
--- Broken down due to SQL Server's limit of 1000 rows
-INSERT INTO toy_production (production_date, toys_produced) VALUES
+('2011-04-07', 1557),
 ('2011-04-06', 643),
 ('2011-04-05', 6598),
 ('2011-04-04', 1232),
