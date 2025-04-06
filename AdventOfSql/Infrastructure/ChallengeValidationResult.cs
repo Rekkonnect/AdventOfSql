@@ -2,8 +2,8 @@
 
 public sealed record ChallengeValidationResult(
     ChallengeOutput? Expected,
-    ChallengeRunResult RunResult,
+    ChallengeRunReport RunReport,
     ChallengeValidationResultType ValidationType)
 {
-    public DapperResult Output => RunResult.Result;
+    public DapperResult Output => RunReport.Result!;
 }

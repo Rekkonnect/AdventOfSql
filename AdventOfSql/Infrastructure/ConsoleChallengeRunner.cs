@@ -1,5 +1,6 @@
 ﻿using Garyon.Objects;
 using Spectre.Console;
+using System.Diagnostics;
 
 namespace AdventOfSql.Infrastructure;
 
@@ -18,31 +19,106 @@ public sealed class ConsoleChallengeRunner
     public async Task Run(ChallengeIdentifier identifier)
     {
         var challengeIdentifierDisplay = FormatChallengeIdentifier(identifier);
-        AnsiConsole.MarkupLine($"Running Challenge {challengeIdentifierDisplay}\n");
+        AnsiConsole.MarkupLine($"Running Challenge {challengeIdentifierDisplay}");
 
-        var result = await _challengeRunner.Run(identifier);
-        WriteRunResult(result);
+        var report = new ChallengeRunReport(identifier);
+        var table = LiveReportTable.New(report);
+
+        const double refreshHz = 240;
+        const double updateMs = 1000 / refreshHz;
+        var displayTable = table.Table
+            .Border(TableBorder.Simple)
+            .WithPadder()
+            .PadLeft(3)
+            ;
+
+        var liveTask = AnsiConsole.Live(displayTable)
+            .StartAsync(async context =>
+            {
+                await Task.Yield();
+
+                while (true)
+                {
+                    table.Update();
+                    context.Refresh();
+
+                    if (report.HasFinished)
+                    {
+                        return Task.CompletedTask;
+                    }
+
+                    Thread.Sleep((int)updateMs);
+                }
+            });
+
+        await _challengeRunner.Run(report);
+        await liveTask;
+        WriteRunResult(report);
     }
 
-    private static void WriteRunResult(ChallengeRunResult result)
+    private sealed record LiveReportTable(
+        ChallengeRunReport Report,
+        SpectreTable Table)
     {
-        AnsiConsole.MarkupLine($"""
-               Schema time   {PrintExecutionTime(result.SchemaTime)}
-                Input time   {PrintExecutionTime(result.InputTime)}
-                Solve time   {PrintExecutionTime(result.SolveTime)}
+        private long _lastUpdateTimestamp;
 
-            Result Table
-            
+        public void Update()
+        {
+            SetReportValues(Table, Report);
 
-            """);
+            var updateDelay = Stopwatch.GetElapsedTime(_lastUpdateTimestamp);
+            var ms = updateDelay.TotalSeconds;
+            var fps = 1 / ms;
+            Table.Caption($"Update [red]{fps:N2} FPS[/]");
+            _lastUpdateTimestamp = Stopwatch.GetTimestamp();
+        }
 
-        var table = result.Result.ConstructSpectreTable();
+        private static SpectreTable ConstructTableForReport(ChallengeRunReport report)
+        {
+            return new SpectreTable()
+                .AddColumns(
+                    new TableColumn($"[cyan]Stage[/]")
+                        .Centered(),
+                    new TableColumn($"[cyan]Time[/]")
+                        .RightAligned()
+                        .Width(18))
+                ;
+        }
+
+        private static void SetReportValues(
+            SpectreTable table, ChallengeRunReport report)
+        {
+            table.Rows.Clear();
+            table.AddRow(["Schema", PrintExecutionTime(report.SchemaTime)]);
+            table.AddRow(["Input", PrintExecutionTime(report.InputTime)]);
+            table.AddRow(["Solve", PrintExecutionTime(report.SolveTime)]);
+        }
+
+        public static LiveReportTable New(ChallengeRunReport report)
+        {
+            var table = ConstructTableForReport(report);
+            return new(report, table);
+        }
+    }
+
+    private static void WriteRunResult(ChallengeRunReport report)
+    {
+        var table = report.Result!.ConstructSpectreTable()
+            .WithPadder()
+            .PadLeft(3);
         AnsiConsole.Write(table);
         AnsiConsole.WriteLine();
     }
 
-    private static string PrintExecutionTime(TimeSpan time)
+    private static string PrintExecutionTime(TimeDuration? duration)
     {
+        if (duration is null)
+        {
+            return string.Empty;
+        }
+
+        var time = duration.FinishedOrCurrentDuration();
+
         if (time.Seconds > 1)
         {
             return $"[red]{time.TotalSeconds:N2} s[/]";

@@ -6,7 +6,9 @@ public static class QueryHelpers
 {
     public static SpectreTable ConstructSpectreTable(this DapperResult output)
     {
-        var table = new SpectreTable();
+        var table = new SpectreTable()
+            .Title("[[[yellow][u]Results[/][/]]]")
+            .Border(TableBorder.Simple);
 
         foreach (var column in output.ColumnNames)
         {

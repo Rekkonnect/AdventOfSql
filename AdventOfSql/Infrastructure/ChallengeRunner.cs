@@ -2,14 +2,15 @@
 using Dapper;
 using Garyon.Extensions;
 using Microsoft.Data.SqlClient;
-using System.Diagnostics;
 
 namespace AdventOfSql.Infrastructure;
 
 public sealed class ChallengeRunner
 {
-    public async Task<ChallengeRunResult> Run(ChallengeIdentifier identifier)
+    public async Task Run(ChallengeRunReport runReport)
     {
+        var identifier = runReport.Identifier;
+
         await using var connection = await ConnectionHelpers.CreateOpenConnection();
 
         var databaseName = DatabaseNameForIdentifier(identifier);
@@ -21,27 +22,27 @@ public sealed class ChallengeRunner
         // Schema
         var schemaFile = FileForChallenge(SqlKinds.Schemas, identifier);
 
-        var schemaStart = Stopwatch.GetTimestamp();
+        runReport.SchemaTime = TimeDuration.ForNow();
         await ExecuteSql(connection, schemaFile);
-        var schemaTime = Stopwatch.GetElapsedTime(schemaStart);
+        runReport.SchemaTime.SetCurrentDuration();
 
         await connection.DeleteAllRows();
 
         // Input
         var inputFile = FileForChallenge(SqlKinds.Inputs, identifier);
 
-        var inputStart = Stopwatch.GetTimestamp();
+        runReport.InputTime = TimeDuration.ForNow();
         await ExecuteInput(connection, inputFile);
-        var inputTime = Stopwatch.GetElapsedTime(inputStart);
+        runReport.InputTime.SetCurrentDuration();
 
         // Solution
         var solutionFile = FileForChallenge(SqlKinds.Solutions, identifier);
 
-        var solveStart = Stopwatch.GetTimestamp();
+        runReport.SolveTime = TimeDuration.ForNow();
         var solutionResult = await RunSolver(connection, solutionFile);
-        var solveTime = Stopwatch.GetElapsedTime(solveStart);
+        runReport.SolveTime.SetCurrentDuration();
 
-        return new(identifier, solutionResult, schemaTime, inputTime, solveTime);
+        runReport.Result = solutionResult;
     }
 
     private static async Task ExecuteInput(
