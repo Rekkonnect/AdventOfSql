@@ -1,5 +1,6 @@
 ﻿using AdventOfSql.SqlHelpers;
 using Dapper;
+using Garyon.Extensions;
 using Microsoft.Data.SqlClient;
 using System.Diagnostics;
 
@@ -56,8 +57,8 @@ public sealed class ChallengeRunner
         FileInfo solutionFile)
     {
         var sql = await solutionFile.ReadAllTextAsync();
-        var query = await connection.QueryAsync(sql);
-        var list = query.ToList();
+        var readRows = await connection.ExecuteStatementsThenQuery(sql);
+        var list = readRows.ToList();
         return DapperResult.FromOutput(list);
     }
 
@@ -72,7 +73,22 @@ public sealed class ChallengeRunner
         string sqlKind,
         ChallengeIdentifier identifier)
     {
+        identifier = IdentifierForSqlFileKind(sqlKind, identifier);
         return $"Challenges/{sqlKind}/Year{identifier.DayIdentifier.Year}/{identifier.InputFileName}.sql";
+    }
+
+    private static ChallengeIdentifier IdentifierForSqlFileKind(
+        string sqlKind,
+        ChallengeIdentifier identifier)
+    {
+        switch (sqlKind)
+        {
+            case SqlKinds.Inputs:
+                return identifier;
+
+            default:
+                return identifier.WithRealInputIdentifier();
+        }
     }
 
     private static string DatabaseNameForIdentifier(ChallengeIdentifier identifier)

@@ -24,4 +24,12 @@ public readonly record struct ChallengeIdentifier(
         : this(new(year, day), testCase)
     {
     }
+
+    public ChallengeIdentifier WithRealInputIdentifier()
+    {
+        return this with
+        {
+            TestCaseIdentifier = TestCaseIdentifier.RealInput,
+        };
+    }
 }
