@@ -22,6 +22,12 @@ public static class SqlServerExtensions
     public static async Task DeleteSchema(this SqlConnection database)
     {
         const string sql = """
+            EXEC sp_MSForEachTable 'DISABLE TRIGGER ALL ON ?';
+            EXEC sp_MSForEachTable '
+                DECLARE @sql NVARCHAR(MAX);
+                SET @sql = ''ALTER TABLE ? DROP CONSTRAINT IF EXISTS '' + (SELECT name FROM sys.foreign_keys WHERE parent_object_id = OBJECT_ID(''?'')); 
+                EXEC sp_executesql @sql;
+            ';
             EXEC sp_MSForEachTable 'DROP TABLE ?';
             """;
 
