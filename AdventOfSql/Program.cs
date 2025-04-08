@@ -3,5 +3,5 @@ using Garyon.Objects;
 
 await Singleton<ConsoleChallengeRunner>.Instance
     .RunMany([
-        new(2024, 11),
+        new(2024, 12),
     ]);
