@@ -14,12 +14,36 @@ public static class SqlCommandExtensions
     {
         var parser = Singleton<SqlQueryParser>.Instance;
         var dialect = Singleton<MsSqlDialect>.Instance;
-        var ast = parser.Parse(sql, dialect);
+        Sequence<Statement> ast;
+        try
+        {
+            ast = parser.Parse(sql, dialect);
+        }
+        catch (ParserException)
+        {
+            // The parser may fail in known cases like this:
+            // - `GEOGRAPHY::Point(-73.985130, 40.758896, 4326)` fails
+            //     The `-` before 73.98... is not supported by the parser
+            return sql;
+        }
+
+        var replacements = ast.Select(ReplaceStatements).ToList();
+        if (replacements.All(static s => s.IsNoOp))
+        {
+            // Avoid changing the SQL -- the parser has some serious bugs
+            // that need be worked out
+            // Notable example:
+            // - `GEOGRAPHY::STPolyFromText('POLYGON((-74.25909 40.477399, ...` breaks
+            //     The parser does not respect the string argument and removes the quotes,
+            //     reconstructing the above as:
+            //     `GEOGRAPHY::STPolyFromText(POLYGON((-74.25909 40.477399, ...`
+            return sql;
+        }
         var replaced = new Sequence<Statement>(
-            ast.SelectMany(ReplaceStatements));
+            replacements.SelectMany(static s => s.ReplacedOrOriginal));
         return SqlWritingExtensions.ToSqlDelimited(replaced, $";{Environment.NewLine}");
 
-        IReadOnlyList<Statement> ReplaceStatements(Statement statement)
+        StatementReplacement ReplaceStatements(Statement statement)
         {
             if (statement is Statement.Insert insert)
             {
@@ -28,7 +52,7 @@ public static class SqlCommandExtensions
                     .As<SetExpression.ValuesExpression>();
                 if (bodyValues is null)
                 {
-                    return [statement];
+                    return StatementReplacement.Empty(statement);
                 }
 
                 var values = bodyValues.Values;
@@ -54,11 +78,36 @@ public static class SqlCommandExtensions
                         })
                         .ToList()
                         ;
-                    return inserts;
+                    return new(statement, inserts);
                 }
             }
 
-            return [statement];
+            return StatementReplacement.Empty(statement);
+        }
+    }
+
+    private sealed record StatementReplacement(
+        Statement Original,
+        IReadOnlyList<Statement> Replacements)
+    {
+        public IReadOnlyList<Statement> ReplacedOrOriginal
+        {
+            get
+            {
+                if (IsNoOp)
+                {
+                    return [Original];
+                }
+
+                return Replacements;
+            }
+        }
+
+        public bool IsNoOp => Replacements is [];
+
+        public static StatementReplacement Empty(Statement original)
+        {
+            return new(original, []);
         }
     }
 }

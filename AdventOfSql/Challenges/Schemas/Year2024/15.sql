@@ -1,0 +1,11 @@
+CREATE TABLE sleigh_locations (
+    id INTEGER IDENTITY(1, 1) PRIMARY KEY,
+    timestamp DATETIMEOFFSET NOT NULL,
+    coordinate GEOGRAPHY NOT NULL
+);
+
+CREATE TABLE areas (
+    id INTEGER IDENTITY(1, 1) PRIMARY KEY,
+    place_name VARCHAR(255) NOT NULL,
+    polygon GEOGRAPHY NOT NULL
+);
