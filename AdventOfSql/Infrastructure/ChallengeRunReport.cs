@@ -4,9 +4,19 @@ public sealed record ChallengeRunReport(
     ChallengeIdentifier Identifier)
 {
     public DapperResult? Result { get; set; }
-    public TimeDuration? SchemaTime { get; set; }
-    public TimeDuration? InputTime { get; set; }
-    public TimeDuration? SolveTime { get; set; }
+
+    public TimeDuration ConnectionTime { get; } = new();
+    public TimeDuration EnsureDatabaseExistsTime { get; } = new();
+
+    public TimeDuration DeleteSchemaTime { get; } = new();
+    public TimeDuration LoadSchemaFileTime { get; } = new();
+    public TimeDuration ConstructSchemaTime { get; } = new();
+
+    public TimeDuration LoadInputFileTime { get; } = new();
+    public TimeDuration InputTime { get; } = new();
+
+    public TimeDuration LoadSolveFileTime { get; } = new();
+    public TimeDuration SolveTime { get; } = new();
 
     public bool HasFinished => Result is not null;
 }

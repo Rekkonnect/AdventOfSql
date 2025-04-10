@@ -11,38 +11,60 @@ public sealed class ChallengeRunner
     {
         var identifier = runReport.Identifier;
 
+        runReport.ConnectionTime.SetStartNow();
         await using var connection = await ConnectionHelpers.CreateOpenConnection();
+        runReport.ConnectionTime.SetCurrentDuration();
 
-        var databaseName = DatabaseNameForIdentifier(identifier);
-        await connection.CreateDatabaseIfNotExists(databaseName);
-        await connection.ChangeDatabaseAsync(databaseName);
+        // This tracking system can be more sophisticated and generalized
 
-        await connection.DeleteSchema();
+        using (runReport.EnsureDatabaseExistsTime.TrackDuration())
+        {
+            var databaseName = DatabaseNameForIdentifier(identifier);
+            await connection.CreateDatabaseIfNotExists(databaseName);
+            await connection.ChangeDatabaseAsync(databaseName);
+        }
+
+        using (runReport.DeleteSchemaTime.TrackDuration())
+        {
+            await connection.DeleteSchema();
+        }
 
         // Schema
-        var schemaFile = FileForChallenge(SqlKinds.Schemas, identifier);
+        FileInfo schemaFile;
+        using (runReport.LoadSchemaFileTime.TrackDuration())
+        {
+            schemaFile = FileForChallenge(SqlKinds.Schemas, identifier);
+        }
 
-        runReport.SchemaTime = TimeDuration.ForNow();
-        await ExecuteSql(connection, schemaFile);
-        runReport.SchemaTime.SetCurrentDuration();
-
-        await connection.DeleteAllRows();
+        using (runReport.ConstructSchemaTime.TrackDuration())
+        {
+            await ExecuteSql(connection, schemaFile);
+        }
 
         // Input
-        var inputFile = FileForChallenge(SqlKinds.Inputs, identifier);
+        FileInfo inputFile;
+        using (runReport.LoadInputFileTime.TrackDuration())
+        {
+            inputFile = FileForChallenge(SqlKinds.Inputs, identifier);
+        }
 
-        runReport.InputTime = TimeDuration.ForNow();
-        await ExecuteInput(connection, inputFile);
-        runReport.InputTime.SetCurrentDuration();
+        using (runReport.InputTime.TrackDuration())
+        {
+            await ExecuteInput(connection, inputFile);
+        }
 
         // Solution
-        var solutionFile = FileForChallenge(SqlKinds.Solutions, identifier);
+        FileInfo solutionFile;
+        using (runReport.LoadSolveFileTime.TrackDuration())
+        {
+            solutionFile = FileForChallenge(SqlKinds.Solutions, identifier);
+        }
 
-        runReport.SolveTime = TimeDuration.ForNow();
-        var solutionResult = await RunSolver(connection, solutionFile);
-        runReport.SolveTime.SetCurrentDuration();
-
-        runReport.Result = solutionResult;
+        using (runReport.SolveTime.TrackDuration())
+        {
+            var solutionResult = await RunSolver(connection, solutionFile);
+            runReport.Result = solutionResult;
+        }
     }
 
     private static async Task ExecuteInput(

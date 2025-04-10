@@ -1,4 +1,5 @@
-﻿using Garyon.Objects;
+﻿using Garyon.Extensions;
+using Garyon.Objects;
 using Spectre.Console;
 using System.Diagnostics;
 
@@ -6,6 +7,8 @@ namespace AdventOfSql.Infrastructure;
 
 public sealed class ConsoleChallengeRunner
 {
+    private static readonly IAnsiConsole _console = AnsiConsole.Console;
+
     private readonly ChallengeRunner _challengeRunner = Singleton<ChallengeRunner>.Instance;
 
     public async Task RunMany(IReadOnlyList<ChallengeIdentifier> identifiers)
@@ -19,7 +22,7 @@ public sealed class ConsoleChallengeRunner
     public async Task Run(ChallengeIdentifier identifier)
     {
         var challengeIdentifierDisplay = FormatChallengeIdentifier(identifier);
-        AnsiConsole.MarkupLine($"Running Challenge {challengeIdentifierDisplay}");
+        _console.MarkupLine($"Running Challenge {challengeIdentifierDisplay}");
 
         var report = new ChallengeRunReport(identifier);
         var table = LiveReportTable.New(report);
@@ -32,7 +35,7 @@ public sealed class ConsoleChallengeRunner
             .PadLeft(3)
             ;
 
-        var liveTask = AnsiConsole.Live(displayTable)
+        var liveTask = _console.Live(displayTable)
             .StartAsync(async context =>
             {
                 await Task.Yield();
@@ -78,7 +81,7 @@ public sealed class ConsoleChallengeRunner
             return new SpectreTable()
                 .AddColumns(
                     new TableColumn($"[cyan]Stage[/]")
-                        .Centered(),
+                        .LeftAligned(),
                     new TableColumn($"[cyan]Time[/]")
                         .RightAligned()
                         .Width(18))
@@ -89,9 +92,23 @@ public sealed class ConsoleChallengeRunner
             SpectreTable table, ChallengeRunReport report)
         {
             table.Rows.Clear();
-            table.AddRow(["Schema", PrintExecutionTime(report.SchemaTime)]);
-            table.AddRow(["Input", PrintExecutionTime(report.InputTime)]);
-            table.AddRow(["Solve", PrintExecutionTime(report.SolveTime)]);
+
+            table.AddRow(["[yellow]Database[/]", ExecutionTimeMarkup(report.ConnectionTime, report.EnsureDatabaseExistsTime)]);
+            table.AddRow(["├── [olive]Connection[/]", ExecutionTimeMarkup(report.ConnectionTime)]);
+            table.AddRow(["└── [olive]Ensure Exists[/]", ExecutionTimeMarkup(report.EnsureDatabaseExistsTime)]);
+            table.AddRow(["", ""]);
+            table.AddRow(["[yellow]Schema[/]", ExecutionTimeMarkup(report.DeleteSchemaTime, report.ConstructSchemaTime)]);
+            table.AddRow(["├── [olive]Delete[/]", ExecutionTimeMarkup(report.DeleteSchemaTime)]);
+            table.AddRow(["├── [olive]Load File[/]", ExecutionTimeMarkup(report.LoadSchemaFileTime)]);
+            table.AddRow(["└── [olive]Construct[/]", ExecutionTimeMarkup(report.ConstructSchemaTime)]);
+            table.AddRow(["", ""]);
+            table.AddRow(["[yellow]Input[/]", ExecutionTimeMarkup(report.LoadInputFileTime, report.InputTime)]);
+            table.AddRow(["├── [olive]Load File[/]", ExecutionTimeMarkup(report.LoadInputFileTime)]);
+            table.AddRow(["└── [olive]Run[/]", ExecutionTimeMarkup(report.InputTime)]);
+            table.AddRow(["", ""]);
+            table.AddRow(["[yellow]Solve[/]", ExecutionTimeMarkup(report.LoadSolveFileTime, report.SolveTime)]);
+            table.AddRow(["├── [olive]Load File[/]", ExecutionTimeMarkup(report.LoadSolveFileTime)]);
+            table.AddRow(["└── [olive]Run[/]", ExecutionTimeMarkup(report.SolveTime)]);
         }
 
         public static LiveReportTable New(ChallengeRunReport report)
@@ -106,20 +123,36 @@ public sealed class ConsoleChallengeRunner
         var table = report.Result!.ConstructSpectreTable()
             .WithPadder()
             .PadLeft(3);
-        AnsiConsole.Write(table);
-        AnsiConsole.WriteLine();
+        _console.Write(table);
+        _console.WriteLine();
     }
 
-    private static string PrintExecutionTime(TimeDuration? duration)
+    private static string ExecutionTimeMarkup(
+        TimeDuration startingDuration, TimeDuration finalDuration)
     {
-        if (duration is null)
+        var timeSpan = finalDuration.FromOtherStartingDuration(startingDuration);
+        if (timeSpan < TimeSpan.Zero)
+        {
+            return string.Empty;
+        }
+
+        return ExecutionTimeMarkup(timeSpan);
+    }
+
+    private static string ExecutionTimeMarkup(TimeDuration duration)
+    {
+        if (duration.IsUninitialized)
         {
             return string.Empty;
         }
 
         var time = duration.FinishedOrCurrentDuration();
+        return ExecutionTimeMarkup(time);
+    }
 
-        if (time.Seconds > 1)
+    private static string ExecutionTimeMarkup(TimeSpan time)
+    {
+        if (time.Seconds > 1.2)
         {
             return $"[red]{time.TotalSeconds:N2} s[/]";
         }
