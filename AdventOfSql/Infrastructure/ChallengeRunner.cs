@@ -19,27 +19,28 @@ public sealed class ChallengeRunner
         }
     }
 
-    private static async Task RunCore(ChallengeRunReport runReport)
+    private static async Task RunCore(ChallengeRunReport report)
     {
-        var identifier = runReport.Identifier;
-        var timeDurationFlowManager = new TimeDurationFlowManager();
+        var identifier = report.Identifier;
+        var runFlow = report.RunFlow;
+        var stepFlowManager = new StepFlowManager();
 
-        timeDurationFlowManager.BeginTracking(runReport.ConnectionTime);
+        stepFlowManager.BeginTracking(runFlow.ConnectionTime);
         await using var connection = await ConnectionHelpers.CreateOpenConnection();
 
         // This tracking system can be more sophisticated and generalized
 
-        timeDurationFlowManager.BeginTracking(runReport.EnsureDatabaseExistsTime);
+        stepFlowManager.BeginTracking(runFlow.EnsureDatabaseExistsTime);
         var databaseName = DatabaseNameForIdentifier(identifier);
         await connection.CreateDatabaseIfNotExists(databaseName);
         await connection.ChangeDatabaseAsync(databaseName);
 
-        timeDurationFlowManager.BeginTracking(runReport.DeleteSchemaTime);
+        stepFlowManager.BeginTracking(runFlow.DeleteSchemaTime);
         await connection.DeleteSchema();
 
         // Supplementary
+        stepFlowManager.BeginTracking(runFlow.LoadSupplementaryFileTime);
         string? supplementarySql = null;
-        timeDurationFlowManager.BeginTracking(runReport.LoadSupplementaryFileTime);
         var supplementaryFile = FileForChallenge(SqlKinds.Supplementary, identifier);
         try
         {
@@ -50,38 +51,38 @@ public sealed class ChallengeRunner
             // If the file was not found; we ignore the issue and move on
         }
 
-        timeDurationFlowManager.BeginTracking(runReport.ConstructSupplementaryTime);
+        stepFlowManager.BeginTracking(runFlow.ConstructSupplementaryTime);
         if (supplementarySql is not null)
         {
             await connection.ExecuteSplitQueries(supplementarySql);
         }
 
         // Schema
-        timeDurationFlowManager.BeginTracking(runReport.LoadSchemaFileTime);
+        stepFlowManager.BeginTracking(runFlow.LoadSchemaFileTime);
         var schemaFile = FileForChallenge(SqlKinds.Schemas, identifier);
         var schemaSql = await schemaFile.ReadAllTextAsync();
 
-        timeDurationFlowManager.BeginTracking(runReport.ConstructSchemaTime);
+        stepFlowManager.BeginTracking(runFlow.ConstructSchemaTime);
         await connection.ExecuteSplitQueries(schemaSql);
 
         // Input
-        timeDurationFlowManager.BeginTracking(runReport.LoadInputFileTime);
+        stepFlowManager.BeginTracking(runFlow.LoadInputFileTime);
         var inputFile = FileForChallenge(SqlKinds.Inputs, identifier);
         var inputSql = await inputFile.ReadAllTextAsync();
 
-        timeDurationFlowManager.BeginTracking(runReport.InputTime);
+        stepFlowManager.BeginTracking(runFlow.InputTime);
         await ExecuteInput(connection, inputSql);
 
         // Solution
-        timeDurationFlowManager.BeginTracking(runReport.LoadSolveFileTime);
+        stepFlowManager.BeginTracking(runFlow.LoadSolveFileTime);
         var solutionFile = FileForChallenge(SqlKinds.Solutions, identifier);
         var solutionSql = await solutionFile.ReadAllTextAsync();
 
-        timeDurationFlowManager.BeginTracking(runReport.SolveTime);
+        stepFlowManager.BeginTracking(runFlow.SolveTime);
         var solutionResult = await RunSolver(connection, solutionSql);
-        runReport.Result = solutionResult;
+        report.Result = solutionResult;
 
-        timeDurationFlowManager.Finish();
+        stepFlowManager.Finish();
     }
 
     private static async Task ExecuteInput(

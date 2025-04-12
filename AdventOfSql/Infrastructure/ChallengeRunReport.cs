@@ -6,22 +6,7 @@ public sealed record ChallengeRunReport(
     public DapperResult? Result { get; set; }
     public Exception? Exception { get; set; }
 
-    public TimeDuration ConnectionTime { get; } = new();
-    public TimeDuration EnsureDatabaseExistsTime { get; } = new();
-
-    public TimeDuration DeleteSchemaTime { get; } = new();
-
-    public TimeDuration LoadSupplementaryFileTime { get; } = new();
-    public TimeDuration ConstructSupplementaryTime { get; } = new();
-
-    public TimeDuration LoadSchemaFileTime { get; } = new();
-    public TimeDuration ConstructSchemaTime { get; } = new();
-
-    public TimeDuration LoadInputFileTime { get; } = new();
-    public TimeDuration InputTime { get; } = new();
-
-    public TimeDuration LoadSolveFileTime { get; } = new();
-    public TimeDuration SolveTime { get; } = new();
+    public ChallengeRunFlow RunFlow { get; } = new();
 
     public bool HasFinished
         => Result is not null

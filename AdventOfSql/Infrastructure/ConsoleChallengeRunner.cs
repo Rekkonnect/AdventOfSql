@@ -1,6 +1,7 @@
 ﻿using Garyon.Extensions;
 using Garyon.Objects;
 using Spectre.Console;
+using System.Collections.Immutable;
 using System.Diagnostics;
 
 namespace AdventOfSql.Infrastructure;
@@ -92,27 +93,63 @@ public sealed class ConsoleChallengeRunner
             SpectreTable table, ChallengeRunReport report)
         {
             table.Rows.Clear();
+            AddStepTrackParents(table, report.RunFlow.Parents);
+        }
 
-            table.AddRow(["[yellow]Database[/]", ExecutionTimeMarkup(report.ConnectionTime, report.EnsureDatabaseExistsTime)]);
-            table.AddRow(["├── [olive]Connection[/]", ExecutionTimeMarkup(report.ConnectionTime)]);
-            table.AddRow(["├── [olive]Ensure Exists[/]", ExecutionTimeMarkup(report.EnsureDatabaseExistsTime)]);
-            table.AddRow(["└── [olive]Delete Schema[/]", ExecutionTimeMarkup(report.DeleteSchemaTime)]);
+        private static void AddEmptyRow(SpectreTable table)
+        {
             table.AddRow(["", ""]);
-            table.AddRow(["[yellow]Supplementary[/]", ExecutionTimeMarkup(report.LoadSupplementaryFileTime, report.ConstructSupplementaryTime)]);
-            table.AddRow(["├── [olive]Load File[/]", ExecutionTimeMarkup(report.LoadSupplementaryFileTime)]);
-            table.AddRow(["└── [olive]Construct[/]", ExecutionTimeMarkup(report.ConstructSupplementaryTime)]);
-            table.AddRow(["", ""]);
-            table.AddRow(["[yellow]Schema[/]", ExecutionTimeMarkup(report.LoadSchemaFileTime, report.ConstructSchemaTime)]);
-            table.AddRow(["├── [olive]Load File[/]", ExecutionTimeMarkup(report.LoadSchemaFileTime)]);
-            table.AddRow(["└── [olive]Construct[/]", ExecutionTimeMarkup(report.ConstructSchemaTime)]);
-            table.AddRow(["", ""]);
-            table.AddRow(["[yellow]Input[/]", ExecutionTimeMarkup(report.LoadInputFileTime, report.InputTime)]);
-            table.AddRow(["├── [olive]Load File[/]", ExecutionTimeMarkup(report.LoadInputFileTime)]);
-            table.AddRow(["└── [olive]Run[/]", ExecutionTimeMarkup(report.InputTime)]);
-            table.AddRow(["", ""]);
-            table.AddRow(["[yellow]Solve[/]", ExecutionTimeMarkup(report.LoadSolveFileTime, report.SolveTime)]);
-            table.AddRow(["├── [olive]Load File[/]", ExecutionTimeMarkup(report.LoadSolveFileTime)]);
-            table.AddRow(["└── [olive]Run[/]", ExecutionTimeMarkup(report.SolveTime)]);
+        }
+
+        private const string _nestedWithFollowingChildrenPrefix = "├──";
+        private const string _nestedFinalChildPrefix = "└──";
+
+        private static string PrefixForIndex(int index, int length)
+        {
+            var isLast = index.IsLastIndex(length);
+            return isLast
+                ? _nestedFinalChildPrefix
+                : _nestedWithFollowingChildrenPrefix
+                ;
+        }
+
+        private static void AddStepTrackParents(
+            SpectreTable table,
+            IReadOnlyList<StepTrackParent> parents)
+        {
+            int parentsLength = parents.Count;
+            for (int i = 0; i < parentsLength; i++)
+            {
+                var parent = parents[i];
+                AddStepTrackParentRows(table, parent);
+                if (!i.IsLastIndex(parentsLength))
+                {
+                    AddEmptyRow(table);
+                }
+            }
+        }
+
+        private static void AddStepTrackParentRows(
+            SpectreTable table,
+            StepTrackParent parent)
+        {
+            table.AddRow([$"[yellow]{parent.Label}[/]", ExecutionTimeMarkup(parent)]);
+            var tracks = parent.Tracks;
+            int trackCount = tracks.Length;
+            for (int i = 0; i < trackCount; i++)
+            {
+                var prefix = PrefixForIndex(i, trackCount);
+                var track = tracks[i];
+                AddStepTrackRow(table, prefix, track);
+            }
+        }
+
+        private static void AddStepTrackRow(
+            SpectreTable table,
+            string prefix,
+            StepTrack track)
+        {
+            table.AddRow([$"{prefix} [olive]{track.Label}[/]", ExecutionTimeMarkup(track)]);
         }
 
         public static LiveReportTable New(ChallengeRunReport report)
@@ -143,9 +180,9 @@ public sealed class ConsoleChallengeRunner
     }
 
     private static string ExecutionTimeMarkup(
-        TimeDuration startingDuration, TimeDuration finalDuration)
+        StepTrack startingDuration, StepTrack finalDuration)
     {
-        var timeSpan = finalDuration.FromOtherStartingDuration(startingDuration);
+        var timeSpan = finalDuration.FromOtherStartingStep(startingDuration);
         if (timeSpan < TimeSpan.Zero)
         {
             return string.Empty;
@@ -154,7 +191,19 @@ public sealed class ConsoleChallengeRunner
         return ExecutionTimeMarkup(timeSpan);
     }
 
-    private static string ExecutionTimeMarkup(TimeDuration duration)
+    private static string ExecutionTimeMarkup(
+        StepTrackParent parent)
+    {
+        var timeSpan = parent.Elapsed();
+        if (timeSpan < TimeSpan.Zero)
+        {
+            return string.Empty;
+        }
+
+        return ExecutionTimeMarkup(timeSpan);
+    }
+
+    private static string ExecutionTimeMarkup(StepTrack duration)
     {
         if (duration.IsUninitialized)
         {
