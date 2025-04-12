@@ -124,6 +124,17 @@ public sealed class ConsoleChallengeRunner
 
     private static void WriteRunResult(ChallengeRunReport report)
     {
+        if (report.Exception is not null)
+        {
+            _console.WriteException(report.Exception);
+            return;
+        }
+
+        WriteSuccessfulOutput(report);
+    }
+
+    private static void WriteSuccessfulOutput(ChallengeRunReport report)
+    {
         var table = report.Result!.ConstructSpectreTable()
             .WithPadder()
             .PadLeft(3);

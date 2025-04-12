@@ -9,6 +9,18 @@ public sealed class ChallengeRunner
 {
     public async Task Run(ChallengeRunReport runReport)
     {
+        try
+        {
+            await RunCore(runReport);
+        }
+        catch (Exception ex)
+        {
+            runReport.Exception = ex;
+        }
+    }
+
+    private static async Task RunCore(ChallengeRunReport runReport)
+    {
         var identifier = runReport.Identifier;
         var timeDurationFlowManager = new TimeDurationFlowManager();
 

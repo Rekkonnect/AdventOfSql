@@ -4,6 +4,7 @@ public sealed record ChallengeRunReport(
     ChallengeIdentifier Identifier)
 {
     public DapperResult? Result { get; set; }
+    public Exception? Exception { get; set; }
 
     public TimeDuration ConnectionTime { get; } = new();
     public TimeDuration EnsureDatabaseExistsTime { get; } = new();
@@ -22,5 +23,8 @@ public sealed record ChallengeRunReport(
     public TimeDuration LoadSolveFileTime { get; } = new();
     public TimeDuration SolveTime { get; } = new();
 
-    public bool HasFinished => Result is not null;
+    public bool HasFinished
+        => Result is not null
+        || Exception is not null
+        ;
 }
