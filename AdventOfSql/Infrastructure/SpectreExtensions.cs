@@ -9,4 +9,28 @@ public static class SpectreExtensions
     {
         return new(renderable);
     }
+
+    public static void WriteLine(
+        this IAnsiConsole console,
+        IRenderable renderable)
+    {
+        console.Write(renderable);
+        console.WriteLine();
+    }
+
+    public static void Write(
+        this IRenderable renderable,
+        IAnsiConsole? console = null)
+    {
+        console ??= AnsiConsole.Console;
+        console.Write(renderable);
+    }
+
+    public static void WriteLine(
+        this IRenderable renderable,
+        IAnsiConsole? console = null)
+    {
+        console ??= AnsiConsole.Console;
+        console.WriteLine(renderable);
+    }
 }

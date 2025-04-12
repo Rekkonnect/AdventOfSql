@@ -1,7 +1,6 @@
-﻿using Garyon.Extensions;
-using Garyon.Objects;
+﻿using Garyon.Objects;
 using Spectre.Console;
-using System.Collections.Immutable;
+using Spectre.Console.Rendering;
 using System.Diagnostics;
 
 namespace AdventOfSql.Infrastructure;
@@ -172,11 +171,21 @@ public sealed class ConsoleChallengeRunner
 
     private static void WriteSuccessfulOutput(ChallengeRunReport report)
     {
-        var table = report.Result!.ConstructSpectreTable()
+        RunOutputRenderable(report)
             .WithPadder()
-            .PadLeft(3);
-        _console.Write(table);
-        _console.WriteLine();
+            .PadLeft(3)
+            .WriteLine(_console);
+    }
+
+    private static IRenderable RunOutputRenderable(ChallengeRunReport report)
+    {
+        var result = report.Result!;
+        if (result.Rows.Count is 0)
+        {
+            return new Markup("[red]No rows were returned -- the solution is wrong[/]");
+        }
+
+        return result.ConstructSpectreTable();
     }
 
     private static string ExecutionTimeMarkup(
