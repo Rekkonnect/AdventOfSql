@@ -9,6 +9,10 @@ public sealed record ChallengeRunReport(
     public TimeDuration EnsureDatabaseExistsTime { get; } = new();
 
     public TimeDuration DeleteSchemaTime { get; } = new();
+
+    public TimeDuration LoadSupplementaryFileTime { get; } = new();
+    public TimeDuration ConstructSupplementaryTime { get; } = new();
+
     public TimeDuration LoadSchemaFileTime { get; } = new();
     public TimeDuration ConstructSchemaTime { get; } = new();
 

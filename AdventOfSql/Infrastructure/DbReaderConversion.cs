@@ -1,7 +1,6 @@
 ﻿using Dapper;
 using System.Data.Common;
 using System.Dynamic;
-using System.Text.RegularExpressions;
 
 namespace AdventOfSql.Infrastructure;
 
@@ -10,9 +9,7 @@ public static class DbReaderExtensions
     public static async Task<IEnumerable<dynamic>> ExecuteStatementsThenQuery(
         this DbConnection connection, string sql)
     {
-        var queries = Regex.Split(sql, @"\bGO\b")
-            .Where(s => s.AsSpan().Trim() is not "")
-            .ToList();
+        var queries = sql.SplitQueries();
 
         foreach (var query in queries.SkipLast(1))
         {
@@ -21,6 +18,18 @@ public static class DbReaderExtensions
 
         var finalSql = queries.Last();
         return await connection.QueryAsync(finalSql);
+    }
+
+    public static async Task ExecuteSplitQueries(
+        this DbConnection connection,
+        string sql)
+    {
+        var queries = sql.SplitQueries();
+
+        foreach (var query in queries)
+        {
+            await connection.ExecuteAsync(query);
+        }
     }
 
     public static async IAsyncEnumerable<dynamic> ExecuteParseRowsAsync(

@@ -41,7 +41,7 @@ public static class SqlServerExtensions
         var sql = $"""
             IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = '{databaseName}')
             BEGIN
-               CREATE DATABASE [{databaseName}];
+                CREATE DATABASE [{databaseName}];
             END
             """;
 

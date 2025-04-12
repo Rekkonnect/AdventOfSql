@@ -95,10 +95,14 @@ public sealed class ConsoleChallengeRunner
 
             table.AddRow(["[yellow]Database[/]", ExecutionTimeMarkup(report.ConnectionTime, report.EnsureDatabaseExistsTime)]);
             table.AddRow(["├── [olive]Connection[/]", ExecutionTimeMarkup(report.ConnectionTime)]);
-            table.AddRow(["└── [olive]Ensure Exists[/]", ExecutionTimeMarkup(report.EnsureDatabaseExistsTime)]);
+            table.AddRow(["├── [olive]Ensure Exists[/]", ExecutionTimeMarkup(report.EnsureDatabaseExistsTime)]);
+            table.AddRow(["└── [olive]Delete Schema[/]", ExecutionTimeMarkup(report.DeleteSchemaTime)]);
             table.AddRow(["", ""]);
-            table.AddRow(["[yellow]Schema[/]", ExecutionTimeMarkup(report.DeleteSchemaTime, report.ConstructSchemaTime)]);
-            table.AddRow(["├── [olive]Delete[/]", ExecutionTimeMarkup(report.DeleteSchemaTime)]);
+            table.AddRow(["[yellow]Supplementary[/]", ExecutionTimeMarkup(report.LoadSupplementaryFileTime, report.ConstructSupplementaryTime)]);
+            table.AddRow(["├── [olive]Load File[/]", ExecutionTimeMarkup(report.LoadSupplementaryFileTime)]);
+            table.AddRow(["└── [olive]Construct[/]", ExecutionTimeMarkup(report.ConstructSupplementaryTime)]);
+            table.AddRow(["", ""]);
+            table.AddRow(["[yellow]Schema[/]", ExecutionTimeMarkup(report.LoadSchemaFileTime, report.ConstructSchemaTime)]);
             table.AddRow(["├── [olive]Load File[/]", ExecutionTimeMarkup(report.LoadSchemaFileTime)]);
             table.AddRow(["└── [olive]Construct[/]", ExecutionTimeMarkup(report.ConstructSchemaTime)]);
             table.AddRow(["", ""]);
@@ -152,9 +156,13 @@ public sealed class ConsoleChallengeRunner
 
     private static string ExecutionTimeMarkup(TimeSpan time)
     {
+        if (time.Microseconds < 1)
+        {
+            return $"[yellow]---   [/]";
+        }
         if (time.Seconds > 1.2)
         {
-            return $"[red]{time.TotalSeconds:N2} s[/]";
+            return $"[red]{time.TotalSeconds:N2} s [/]";
         }
         if (time.Milliseconds > 10)
         {

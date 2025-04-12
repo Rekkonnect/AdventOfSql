@@ -2,6 +2,7 @@
 using SqlParser;
 using SqlParser.Ast;
 using SqlParser.Dialects;
+using System.Text.RegularExpressions;
 
 namespace AdventOfSql.Infrastructure;
 
@@ -109,5 +110,12 @@ public static class SqlCommandExtensions
         {
             return new(original, []);
         }
+    }
+
+    public static IReadOnlyList<string> SplitQueries(this string sql)
+    {
+        return Regex.Split(sql, @"\bGO\b")
+            .Where(s => s.AsSpan().Trim() is not "")
+            .ToList();
     }
 }
