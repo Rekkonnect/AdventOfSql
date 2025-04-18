@@ -231,7 +231,7 @@ public sealed class ConsoleChallengeRunner
         }
         if (time.Seconds > 1.2)
         {
-            return $"[red]{time.TotalSeconds:N2} s [/]";
+            return $"[red]{time.TotalSeconds:N2}  s[/]";
         }
         if (time.Milliseconds > 10)
         {
