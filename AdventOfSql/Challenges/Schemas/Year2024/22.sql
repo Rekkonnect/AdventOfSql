@@ -1,0 +1,5 @@
+CREATE TABLE elves (
+    id INTEGER IDENTITY(1, 1) PRIMARY KEY,
+    elf_name VARCHAR(255) NOT NULL,
+    skills NVARCHAR(MAX) NOT NULL
+);
