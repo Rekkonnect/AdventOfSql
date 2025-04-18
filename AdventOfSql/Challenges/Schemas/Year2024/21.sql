@@ -1,0 +1,5 @@
+CREATE TABLE sales (
+    id INTEGER IDENTITY(1, 1) PRIMARY KEY,
+    sale_date DATE NOT NULL,
+    amount DECIMAL(10, 2) NOT NULL
+);

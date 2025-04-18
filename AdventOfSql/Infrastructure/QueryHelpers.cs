@@ -20,7 +20,7 @@ public static class QueryHelpers
         foreach (var row in output.Rows)
         {
             var rowStrings = row
-                .Select(s => s.ToString()!)
+                .Select(s => $"{s}")
                 .ToArray();
             table.AddRow(rowStrings);
         }
